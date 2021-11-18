@@ -23,11 +23,65 @@ const direction = new THREE.Vector3();
 const vertex = new THREE.Vector3();
 const color = new THREE.Color();
 
+const mouse = new THREE.Vector2();
+
 const loadingElem = document.querySelector("#loading");
 const progressBarElem = loadingElem.querySelector(".progressbar");
 const instructionsElem = document.querySelector("#instructions");
 
 init();
+
+function onClick(event) {
+  // console.log('onClick');
+  doCaster();
+}
+
+function onMouseMove(event) {
+  // calculate mouse position in normalized device coordinates
+  // (-1 to +1) for both components
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+}
+
+function doCaster() {
+  // console.log('doCaster');
+  // update the picking ray with the camera and mouse position
+  raycaster.setFromCamera(mouse, camera);
+  // calculate objects intersecting the picking ray
+  const intersects = raycaster.intersectObjects(scene.children);
+
+  for (let i = 0; i < intersects.length; i++) {
+    // intersects[i].object.material.color.set(0xff0000);
+
+    console.log(intersects[i].object);
+  }
+
+  // renderer.render(scene, camera);
+}
+
+function addCrosshair(camera) {
+  // crosshair
+  const material = new THREE.LineBasicMaterial({ color: 0xFF0000 });
+  // size
+  const crosshairSizeX = 0.05, crosshairSizeY = 0.05;
+  const geometry = new THREE.BufferGeometry();
+  const pointsArray = new Array();
+  pointsArray.push(new THREE.Vector3(0, crosshairSizeY, 0));
+  pointsArray.push(new THREE.Vector3(0, -crosshairSizeY, 0));
+  pointsArray.push(new THREE.Vector3(0, 0, 0));
+  pointsArray.push(new THREE.Vector3(crosshairSizeX, 0, 0));
+  pointsArray.push(new THREE.Vector3(-crosshairSizeX, 0, 0));
+  geometry.setFromPoints(pointsArray);
+  const crosshair = new THREE.Line(geometry, material);
+  const crosshairPercentX = 50;
+  const crosshairPercentY = 50;
+  const crosshairPositionX = (crosshairPercentX / 100) * 2 - 1;
+  const crosshairPositionY = (crosshairPercentY / 100) * 2 - 1;
+  crosshair.position.x = crosshairPositionX * camera.aspect;
+  crosshair.position.y = crosshairPositionY;
+  crosshair.position.z = -3;
+  camera.add(crosshair);
+}
 
 function init() {
   camera = new THREE.PerspectiveCamera(
@@ -37,6 +91,8 @@ function init() {
     1000
   );
   camera.position.y = 10;
+
+  addCrosshair(camera);
 
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0xffffff);
@@ -211,6 +267,8 @@ function init() {
   //
 
   window.addEventListener("resize", onWindowResize);
+  window.addEventListener('mousemove', onMouseMove, false);
+  window.addEventListener('click', onClick);
 }
 
 function onWindowResize() {
@@ -237,7 +295,7 @@ function animate() {
 
     const onObject = intersections.length > 0;
 
-    console.log(intersections.length);
+    // console.log(intersections.length);
 
     const delta = (time - prevTime) / 1000;
 
