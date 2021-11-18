@@ -7,8 +7,8 @@
       name="viewport"
       content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
     />
-    <link type="text/css" rel="stylesheet" href="main.css" />
     <base href="{{site.baseurl}}" />
+    <link type="text/css" rel="stylesheet" href="main.css" />
   </head>
   <body>
     <div id="info">
@@ -289,7 +289,7 @@
             canJump = true;
             //do something
             let modelName = intersections[0].object.name;
-            interactWithSomething(modelName);
+            console.log(modelName);
           }
 
           controls.moveRight(-velocity.x * delta);
