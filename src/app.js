@@ -198,6 +198,7 @@ function init() {
   scene.add(floor);
 
   // objects
+  createGeometry();
   loadingManager();
 
   //
@@ -276,6 +277,35 @@ function animate() {
   prevTime = time;
 
   renderer.render(scene, camera);
+}
+
+function createGeometry() {
+  const geometry = new THREE.BoxGeometry(16, 9, 1);
+  const material = new THREE.MeshBasicMaterial({ color: 0xD6DEE2 });
+  const box_11 = new THREE.Mesh(geometry, material);
+  box_11.name = "all_11_video";
+  box_11.position.set(-250, 30, -400);
+  box_11.scale.set(6, 6, 2);
+  scene.add(box_11);
+
+  const geometry2 = new THREE.BoxGeometry(16, 9, 1);
+  const material2 = new THREE.MeshBasicMaterial({ color: 0xD6DEE2 });
+  const box_19 = new THREE.Mesh(geometry2, material2);
+  box_19.name = "all_11_video";
+  box_19.position.set(-450, 30, -200);
+  box_19.rotation.set(0, 40, 0);
+  box_19.scale.set(6, 6, 2);
+  scene.add(box_19);
+
+  const geometry3 = new THREE.BoxGeometry(16, 9, 1);
+  const material3 = new THREE.MeshBasicMaterial({ color: 0xD6DEE2 });
+  const box_08 = new THREE.Mesh(geometry3, material3);
+  box_08.name = "all_11_video";
+  box_08.position.set(-350, 30, -100);
+  box_08.rotation.set(0, 80, 0);
+  box_08.scale.set(6, 6, 2);
+  scene.add(box_08);
+
 }
 
 function loadingManager() {
@@ -503,5 +533,29 @@ function loadingManager() {
     model.rotation.set(0, 180, 0); // position here
     scene.add(model);
   });
+  //吳柏瑤
+  loader.load("wuscene_21.glb", (gltf) => {
+    let model = gltf.scene;
+    model.traverse(function (child) {
+      if (child.isMesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+        //child.geometry.center(); // center here
+        child.name = "wuscene_21";
+        child.userData = { URL: "" };
+        objects.push(child);
+      }
+      if (child.isLight) {
+        child.castShadow = true;
+        child.shadow.bias = -0.003;
+        child.shadow.mapSize.width = 2048;
+        child.shadow.mapSize.height = 2048;
+      }
+    });
+    model.scale.set(1, 1, 1); // scale here
+    model.position.set(-300, 20, 100); // position here
+    model.rotation.set(0, 340, 0); // position here
+    scene.add(model);
+  });
 }
-//NAXS
+
