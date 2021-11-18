@@ -43,14 +43,14 @@ function init() {
   scene.fog = new THREE.Fog(0xffffff, 0, 750);
 
   const light = new THREE.HemisphereLight(0xeeeeff, 0x777788, 0.75);
-  light.position.set(0.5, 1, 0.75);
+  light.position.set(0.5, 10, 0.75);
   scene.add(light);
 
   const ambientlight = new THREE.AmbientLight(0x6688cc);
   scene.add(ambientlight);
 
   const fillLight1 = new THREE.DirectionalLight(0xff9999, 0.5);
-  fillLight1.position.set(-1, 1, 2);
+  fillLight1.position.set(-1, 10, 2);
   scene.add(fillLight1);
 
   const fillLight2 = new THREE.DirectionalLight(0x8888ff, 0.2);
