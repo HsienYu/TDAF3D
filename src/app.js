@@ -10,6 +10,7 @@ let camera, scene, renderer, controls;
 const objects = [];
 
 let raycaster;
+var crosshairClone;
 
 let moveForward = false;
 let moveBackward = false;
@@ -32,38 +33,46 @@ const instructionsElem = document.querySelector("#instructions");
 init();
 
 function onClick(event) {
-  // console.log('onClick');
-  doCaster();
+  console.log("onClick");
+  doRaycasterCross();
 }
 
 function onMouseMove(event) {
   // calculate mouse position in normalized device coordinates
   // (-1 to +1) for both components
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 }
 
-function doCaster() {
+function doRaycasterCross() {
   // console.log('doCaster');
   // update the picking ray with the camera and mouse position
-  raycaster.setFromCamera(mouse, camera);
+  //console.log(crosshairClone);
+  let crossVector = new THREE.Vector2(crosshairClone.x, crosshairClone.y);
+  let raycasterCross = new THREE.Raycaster(
+    new THREE.Vector3(),
+    new THREE.Vector3(0, -1, 0),
+    0,
+    100
+  );
+  raycasterCross.setFromCamera(crossVector, camera);
   // calculate objects intersecting the picking ray
-  const intersects = raycaster.intersectObjects(scene.children);
+  //const intersects = raycaster.intersectObjects(scene.children);
+  const intersects = raycasterCross.intersectObjects(objects);
 
   for (let i = 0; i < intersects.length; i++) {
     // intersects[i].object.material.color.set(0xff0000);
 
     console.log(intersects[i].object);
   }
-
-  // renderer.render(scene, camera);
 }
 
 function addCrosshair(camera) {
   // crosshair
-  const material = new THREE.LineBasicMaterial({ color: 0xFF0000 });
+  const material = new THREE.LineBasicMaterial({ color: 0xff0000 });
   // size
-  const crosshairSizeX = 0.05, crosshairSizeY = 0.05;
+  const crosshairSizeX = 0.05,
+    crosshairSizeY = 0.05;
   const geometry = new THREE.BufferGeometry();
   const pointsArray = new Array();
   pointsArray.push(new THREE.Vector3(0, crosshairSizeY, 0));
@@ -80,6 +89,7 @@ function addCrosshair(camera) {
   crosshair.position.x = crosshairPositionX * camera.aspect;
   crosshair.position.y = crosshairPositionY;
   crosshair.position.z = -3;
+  crosshairClone = crosshair.position.clone();
   camera.add(crosshair);
 }
 
@@ -267,8 +277,8 @@ function init() {
   //
 
   window.addEventListener("resize", onWindowResize);
-  window.addEventListener('mousemove', onMouseMove, false);
-  window.addEventListener('click', onClick);
+  window.addEventListener("mousemove", onMouseMove, false);
+  window.addEventListener("click", onClick);
 }
 
 function onWindowResize() {
@@ -286,10 +296,10 @@ function animate() {
   if (controls.isLocked === true) {
     raycaster.ray.origin.copy(controls.getObject().position);
     //raycaster.ray.origin.x -= 0;
-    raycaster.ray.origin.y -= 10;
+    //raycaster.ray.origin.y -= 10;
     //raycaster.ray.origin.z -= 10;
 
-    raycaster.setFromCamera(new THREE.Vector2(), camera);
+    raycaster.setFromCamera(mouse, camera);
 
     const intersections = raycaster.intersectObjects(objects, true);
 
@@ -339,7 +349,7 @@ function animate() {
 
 function createGeometry() {
   const geometry = new THREE.BoxGeometry(16, 9, 1);
-  const material = new THREE.MeshBasicMaterial({ color: 0xD6DEE2 });
+  const material = new THREE.MeshBasicMaterial({ color: 0xd6dee2 });
   const box_11 = new THREE.Mesh(geometry, material);
   box_11.name = "all_11_video";
   box_11.position.set(-250, 30, -400);
@@ -347,7 +357,7 @@ function createGeometry() {
   scene.add(box_11);
 
   const geometry2 = new THREE.BoxGeometry(16, 9, 1);
-  const material2 = new THREE.MeshBasicMaterial({ color: 0xD6DEE2 });
+  const material2 = new THREE.MeshBasicMaterial({ color: 0xd6dee2 });
   const box_19 = new THREE.Mesh(geometry2, material2);
   box_19.name = "all_11_video";
   box_19.position.set(-450, 30, -200);
@@ -356,14 +366,13 @@ function createGeometry() {
   scene.add(box_19);
 
   const geometry3 = new THREE.BoxGeometry(16, 9, 1);
-  const material3 = new THREE.MeshBasicMaterial({ color: 0xD6DEE2 });
+  const material3 = new THREE.MeshBasicMaterial({ color: 0xd6dee2 });
   const box_08 = new THREE.Mesh(geometry3, material3);
   box_08.name = "all_11_video";
   box_08.position.set(-350, 30, -100);
   box_08.rotation.set(0, 80, 0);
   box_08.scale.set(6, 6, 2);
   scene.add(box_08);
-
 }
 
 function loadingManager() {
@@ -616,4 +625,3 @@ function loadingManager() {
     scene.add(model);
   });
 }
-
