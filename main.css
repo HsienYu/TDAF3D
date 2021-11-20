@@ -153,4 +153,6 @@ select {
 
   cursor: pointer;
 
+  overflow: scroll;
+
 }
