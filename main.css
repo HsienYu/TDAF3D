@@ -136,3 +136,21 @@ select {
   font-size: 14px;
   cursor: pointer;
 }
+
+#indicator {
+  width: 100%;
+  height: 100%;
+
+  background: rgba(0, 0, 0, 0.65);
+  position: fixed;
+  left:0px;
+
+  visibility: hidden;
+
+
+  text-align: left;
+  font-size: 14px;
+
+  cursor: pointer;
+
+}

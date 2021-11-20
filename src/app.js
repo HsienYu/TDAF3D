@@ -17,6 +17,7 @@ let moveBackward = false;
 let moveLeft = false;
 let moveRight = false;
 let canJump = false;
+let rcState = false;
 
 let prevTime = performance.now();
 const velocity = new THREE.Vector3();
@@ -30,68 +31,9 @@ const loadingElem = document.querySelector("#loading");
 const progressBarElem = loadingElem.querySelector(".progressbar");
 const instructionsElem = document.querySelector("#instructions");
 
+const indicatorElem = document.querySelector("#indicator");
+
 init();
-
-function onClick(event) {
-  console.log("onClick");
-  doRaycasterCross();
-}
-
-function onMouseMove(event) {
-  // calculate mouse position in normalized device coordinates
-  // (-1 to +1) for both components
-  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-}
-
-function doRaycasterCross() {
-  // console.log('doCaster');
-  // update the picking ray with the camera and mouse position
-  //console.log(crosshairClone);
-  let crossVector = new THREE.Vector2(crosshairClone.x, crosshairClone.y);
-  let raycasterCross = new THREE.Raycaster(
-    new THREE.Vector3(),
-    new THREE.Vector3(0, -1, 0),
-    0,
-    100
-  );
-  raycasterCross.setFromCamera(crossVector, camera);
-  // calculate objects intersecting the picking ray
-  //const intersects = raycaster.intersectObjects(scene.children);
-  const intersects = raycasterCross.intersectObjects(objects);
-
-  for (let i = 0; i < intersects.length; i++) {
-    // intersects[i].object.material.color.set(0xff0000);
-
-    console.log(intersects[i].object);
-  }
-}
-
-function addCrosshair(camera) {
-  // crosshair
-  const material = new THREE.LineBasicMaterial({ color: 0xff0000 });
-  // size
-  const crosshairSizeX = 0.05,
-    crosshairSizeY = 0.05;
-  const geometry = new THREE.BufferGeometry();
-  const pointsArray = new Array();
-  pointsArray.push(new THREE.Vector3(0, crosshairSizeY, 0));
-  pointsArray.push(new THREE.Vector3(0, -crosshairSizeY, 0));
-  pointsArray.push(new THREE.Vector3(0, 0, 0));
-  pointsArray.push(new THREE.Vector3(crosshairSizeX, 0, 0));
-  pointsArray.push(new THREE.Vector3(-crosshairSizeX, 0, 0));
-  geometry.setFromPoints(pointsArray);
-  const crosshair = new THREE.Line(geometry, material);
-  const crosshairPercentX = 50;
-  const crosshairPercentY = 50;
-  const crosshairPositionX = (crosshairPercentX / 100) * 2 - 1;
-  const crosshairPositionY = (crosshairPercentY / 100) * 2 - 1;
-  crosshair.position.x = crosshairPositionX * camera.aspect;
-  crosshair.position.y = crosshairPositionY;
-  crosshair.position.z = -3;
-  crosshairClone = crosshair.position.clone();
-  camera.add(crosshair);
-}
 
 function init() {
   camera = new THREE.PerspectiveCamera(
@@ -219,7 +161,7 @@ function init() {
     new THREE.Vector3(),
     new THREE.Vector3(0, -1, 0),
     0,
-    10
+    200
   );
 
   // floor
@@ -272,14 +214,23 @@ function init() {
   renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1;
+  renderer.shadowMap.enabled = true;
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.physicallyCorrectLights = true;
+
   document.body.appendChild(renderer.domElement);
+  
 
   //
 
   window.addEventListener("resize", onWindowResize);
   window.addEventListener("mousemove", onMouseMove, false);
   window.addEventListener("click", onClick);
+  window.addEventListener("mousedown", onMouseDown);
 }
+
 
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
@@ -324,9 +275,9 @@ function animate() {
     if (onObject === true) {
       velocity.y = Math.max(0, velocity.y);
       canJump = true;
-      //do something
-      let modelName = intersections[0].object.name;
-      console.log(modelName);
+      //do something    
+    }else if (rcState === true && onObject === false) {
+      indicatorElem.style.visibility = "hidden";
     }
 
     controls.moveRight(-velocity.x * delta);
@@ -345,6 +296,104 @@ function animate() {
   prevTime = time;
 
   renderer.render(scene, camera);
+}
+
+function onClick(event) {
+  //console.log(event.which);
+  doRaycasterCross(event.which);
+}
+
+function onMouseDown(event){
+  //console.log(event.which);
+  doRaycasterCross(event.which);
+}
+
+function onMouseMove(event) {
+  // calculate mouse position in normalized device coordinates
+  // (-1 to +1) for both components
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+}
+
+function doRaycasterCross(which) {
+  // console.log('doCaster');
+  // update the picking ray with the camera and mouse position
+  //console.log(crosshairClone);
+  let crossVector = new THREE.Vector2(crosshairClone.x, crosshairClone.y);
+  let raycasterCross = new THREE.Raycaster(
+    new THREE.Vector3(),
+    new THREE.Vector3(0, -1, 0),
+    0,
+    200
+  );
+  raycasterCross.setFromCamera(crossVector, camera);
+  // calculate objects intersecting the picking ray
+  //const intersects = raycaster.intersectObjects(scene.children);
+  const intersects = raycasterCross.intersectObjects(objects);
+  indicatorElem.style.visibility = "hidden";
+  const intersectCondition = intersects.length > 0;
+  if (controls.isLocked === true) {
+    if (which === 1){
+      if (intersectCondition) {
+        openLink(intersects[0].object);
+      }
+    }
+    else if (which === 3){
+      if (intersectCondition) {
+        console.log("right click")
+        showDetail(intersects[0].object);
+      }
+    }
+  }
+}
+
+function addCrosshair(camera) {
+  // crosshair
+  const material = new THREE.LineBasicMaterial({ color: 0xff0000 });
+  // size
+  const crosshairSizeX = 0.05,
+    crosshairSizeY = 0.05;
+  const geometry = new THREE.BufferGeometry();
+  const pointsArray = new Array();
+  pointsArray.push(new THREE.Vector3(0, crosshairSizeY, 0));
+  pointsArray.push(new THREE.Vector3(0, -crosshairSizeY, 0));
+  pointsArray.push(new THREE.Vector3(0, 0, 0));
+  pointsArray.push(new THREE.Vector3(crosshairSizeX, 0, 0));
+  pointsArray.push(new THREE.Vector3(-crosshairSizeX, 0, 0));
+  geometry.setFromPoints(pointsArray);
+  const crosshair = new THREE.Line(geometry, material);
+  const crosshairPercentX = 50;
+  const crosshairPercentY = 50;
+  const crosshairPositionX = (crosshairPercentX / 100) * 2 - 1;
+  const crosshairPositionY = (crosshairPercentY / 100) * 2 - 1;
+  crosshair.position.x = crosshairPositionX * camera.aspect;
+  crosshair.position.y = crosshairPositionY;
+  crosshair.position.z = -3;
+  crosshairClone = crosshair.position.clone();
+  camera.add(crosshair);
+}
+
+async function showDetail(obj) {
+  //console.log(obj, onObject);
+  if(controls.isLocked === true){
+    if (rcState) {
+      indicatorElem.style.visibility = "hidden";
+      rcState = false;
+    }else{
+      indicatorElem.style.visibility = "visible";
+      //indicatorElem.innerHTML = obj.page;
+      let url = obj.page.URL;
+      indicatorElem.innerHTML = await (await fetch(url)).text();
+      rcState = true;
+    }
+  }
+}
+
+function openLink(obj) {
+  let url = obj.userData.URL;
+  if (typeof url !== "undefined") {
+    window.open(url, "_blank");
+  }
 }
 
 function createGeometry() {
@@ -416,8 +465,10 @@ function loadingManager() {
         child.castShadow = true;
         child.receiveShadow = true;
         child.geometry.center(); // center here
+        child.material.metalness = 0;
         child.name = "Necklace_AnchiLin";
         child.userData = { URL: "https://raxal-mu.glitch.me/" };
+        child.page = { URL: "pages/AnchiLin.html" };        
         objects.push(child);
       }
       if (child.isLight) {
@@ -440,7 +491,11 @@ function loadingManager() {
         child.castShadow = true;
         child.receiveShadow = true;
         //child.geometry.center(); // center here
+        child.material.metalness = 0.5;
+        child.material.roughness = 0.0;
+        child.material.envMap = scene.background;
         child.name = "Macy_Playboy_scene";
+        child.page = { URL: "pages/playboy.html" };
         objects.push(child);
       }
       if (child.isLight) {
@@ -460,8 +515,10 @@ function loadingManager() {
       if (child.isMesh) {
         child.castShadow = true;
         child.receiveShadow = true;
+        child.material.metalness = 0;
         //child.geometry.center(); // center here
         child.name = "Macy_Laying_pose";
+        child.page = { URL: "pages/playboy.html" };
         objects.push(child);
       }
       if (child.isLight) {
@@ -484,8 +541,12 @@ function loadingManager() {
         child.castShadow = true;
         child.receiveShadow = true;
         //child.geometry.center(); // center here
+        child.material.metalness = 0.5;
+        child.material.roughness = 0.0;
+        child.material.envMap = scene.background;
         child.name = "GhostPayer";
         child.userData = { URL: "https://festdt.36q.space/" };
+        child.page = { URL: "pages/Etsuko.html" };
         objects.push(child);
       }
       if (child.isLight) {
@@ -508,10 +569,12 @@ function loadingManager() {
         child.castShadow = true;
         child.receiveShadow = true;
         //child.geometry.center(); // center here
+        child.material.metalness = 0;
         child.name = "aseptickiss";
         child.userData = {
           URL: "https://object-storage.tyo1.conoha.io/v1/nc_df3bdbc45bc04950b558834f5728517a/unityroom_production/game/23352/webgl/play.html",
         };
+        child.page = { URL: "pages/Aseptickiss.html" };
         objects.push(child);
       }
       if (child.isLight) {
@@ -534,8 +597,12 @@ function loadingManager() {
         child.castShadow = true;
         child.receiveShadow = true;
         //child.geometry.center(); // center here
+        child.material.metalness = 0.5;
+        child.material.roughness = 0.0;
+        child.material.envMap = scene.background;
         child.name = "all_11";
-        child.userData = { URL: "" };
+        //child.userData = { URL: "" };
+        child.page = { URL: "pages/Asako.html" };
         objects.push(child);
       }
       if (child.isLight) {
@@ -558,10 +625,12 @@ function loadingManager() {
         child.castShadow = true;
         child.receiveShadow = true;
         //child.geometry.center(); // center here
+        child.material.metalness = 0.5;
         child.name = "linda";
         child.userData = {
           URL: "https://sidngerigmailcom.itch.io/amysgame",
         };
+        child.page = { URL: "pages/Amy.html" };
         objects.push(child);
       }
       if (child.isLight) {
@@ -584,8 +653,12 @@ function loadingManager() {
         child.castShadow = true;
         child.receiveShadow = true;
         //child.geometry.center(); // center here
+        child.material.metalness = 0.5;
+        child.material.roughness = 0.0;
+        child.material.envMap = scene.background;
         child.name = "blackdoorInside";
         child.userData = { URL: "http://www.realm-of-ember.space/" };
+        child.page = { URL: "pages/Realm.html" };
         objects.push(child);
       }
       if (child.isLight) {
