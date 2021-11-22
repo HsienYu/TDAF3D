@@ -10,13 +10,18 @@
     <!--<base href="{{site.baseurl}}" />-->
     <base href="./" />
     <link type="text/css" rel="stylesheet" href="main.css" />
-    <link rel='shortcut icon' type='image/x-icon' href='./favicon.ico' />
+    <link rel="shortcut icon" type="image/x-icon" href="./favicon.ico" />
+    <script src="./js/three.js"></script>
+    <script src="./js/controls/PointerLockControls.js"></script>
+    <script src="./js/loaders/GLTFLoader.js"></script>
+    <script src="./js/loaders/DRACOLoader.js"></script>
   </head>
   <body>
     <div id="info">
       Taipei Digital Art Festival 2021 - 無邊庇護所 BORDERLESS SHELTER
-      <br />WASD to move, space to jump, use mouse to navigate and move the camera.
-      <br />WASD鍵 前後左右， 空白鍵 跳躍， 滑鼠觀看四周。滑鼠右鍵點擊物件開啟內容，左鍵點擊開啟連結。
+      <br />WASD to move, space to jump, use mouse to navigate and move the
+      camera. <br />WASD鍵 前後左右， 空白鍵 跳躍，
+      滑鼠觀看四周。滑鼠右鍵點擊物件開啟內容，左鍵點擊開啟連結。
     </div>
     <div id="blocker">
       <div id="instructions">
@@ -27,11 +32,88 @@
       <div class="progress"><div class="progressbar"></div></div>
     </div>
     <div id="indicator"></div>
-    <video id="david" playsinline webkit-playsinline  width="270" height="480" src="videos/david.mp4" style="display: none;"></video>
-    <video id="asako" playsinline webkit-playsinline  width="583" height="480" src="videos/asako.mp4" style="display: none;"></video>
-    <video id="eunhee" playsinline webkit-playsinline  width="1392" height="480" src="videos/eunhee.mp4" style="display: none;"></video>
-    <video id="invasion" playsinline webkit-playsinline  width="853" height="480" src="videos/invasion.mp4" style="display: none;"></video>
-    <video id="terms" playsinline webkit-playsinline  width="853" height="480" src="videos/terms.mp4" style="display: none;"></video>
-    <script type="module" src="./src/app.js" ></script>
+    <video
+      id="david"
+      playsinline
+      webkit-playsinline
+      muted
+      width="270"
+      height="480"
+      src="videos/david.mp4"
+      style="display: none"
+    ></video>
+    <video
+      id="asako"
+      playsinline
+      webkit-playsinline
+      muted
+      width="583"
+      height="480"
+      src="videos/asako.mp4"
+      style="display: none"
+    ></video>
+    <video
+      id="eunhee"
+      playsinline
+      webkit-playsinline
+      muted
+      width="1392"
+      height="480"
+      src="videos/eunhee.mp4"
+      style="display: none"
+    ></video>
+    <video
+      id="invasion"
+      playsinline
+      webkit-playsinline
+      muted
+      width="853"
+      height="480"
+      src="videos/invasion.mp4"
+      style="display: none"
+    ></video>
+    <video
+      id="terms"
+      playsinline
+      webkit-playsinline
+      muted
+      width="853"
+      height="480"
+      src="videos/terms.mp4"
+      style="display: none"
+    ></video>
+    <script type="module" src="./src/app.js"></script>
+    <script type="x-shader/x-vertex" id="vertexshader">
+
+      attribute float size;
+
+      varying vec3 vColor;
+
+      void main() {
+
+      	vColor = color;
+
+      	vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+
+      	gl_PointSize = size * ( 300.0 / -mvPosition.z );
+
+      	gl_Position = projectionMatrix * mvPosition;
+
+      }
+    </script>
+    <script type="x-shader/x-fragment" id="fragmentshader">
+
+      uniform sampler2D pointTexture;
+
+      varying vec3 vColor;
+
+      void main() {
+
+      	gl_FragColor = vec4( vColor, 1.0 );
+
+      	gl_FragColor = gl_FragColor * texture2D( pointTexture, gl_PointCoord );
+
+      }
+    </script>
   </body>
 </html>
