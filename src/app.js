@@ -1,5 +1,4 @@
 import * as THREE from "../build/three.module.js";
-//import * as THREE from  "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.min.js"
 
 import { PointerLockControls } from "../jsm/controls/PointerLockControls.js";
 import { GLTFLoader } from "../jsm/loaders/GLTFLoader.js";
@@ -27,11 +26,20 @@ const color = new THREE.Color();
 
 const mouse = new THREE.Vector2();
 
+const listener = new THREE.AudioListener();
+
 const loadingElem = document.querySelector("#loading");
 const progressBarElem = loadingElem.querySelector(".progressbar");
 const instructionsElem = document.querySelector("#instructions");
 
 const indicatorElem = document.querySelector("#indicator");
+
+//Get your video element:
+const david = document.getElementById("david");
+const asako = document.getElementById("asako");
+const eunhee = document.getElementById("eunhee");
+const invasion = document.getElementById("invasion");
+const terms = document.getElementById("terms");
 
 init();
 
@@ -161,7 +169,7 @@ function init() {
     new THREE.Vector3(),
     new THREE.Vector3(0, -1, 0),
     0,
-    200
+    100
   );
 
   // floor
@@ -209,7 +217,8 @@ function init() {
   createGeometry();
   loadingManager();
 
-  //
+  //positional audio
+  camera.add(listener);
 
   renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(window.devicePixelRatio);
@@ -221,16 +230,16 @@ function init() {
   renderer.physicallyCorrectLights = true;
 
   document.body.appendChild(renderer.domElement);
-  
 
+  //prevent safari context menu right click
+  document.addEventListener("contextmenu", (event) => event.preventDefault());
   //
-
   window.addEventListener("resize", onWindowResize);
   window.addEventListener("mousemove", onMouseMove, false);
   window.addEventListener("click", onClick);
   window.addEventListener("mousedown", onMouseDown);
+  //window.addEventListener("dblclick", onDbClick);
 }
-
 
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
@@ -246,13 +255,13 @@ function animate() {
 
   if (controls.isLocked === true) {
     raycaster.ray.origin.copy(controls.getObject().position);
-    //raycaster.ray.origin.x -= 0;
-    //raycaster.ray.origin.y -= 10;
-    //raycaster.ray.origin.z -= 10;
+    // raycaster.ray.origin.x -= 10;
+    raycaster.ray.origin.y -= 10;
+    // raycaster.ray.origin.z -= 10;
 
-    raycaster.setFromCamera(mouse, camera);
+    //raycaster.setFromCamera(mouse, camera);
 
-    const intersections = raycaster.intersectObjects(objects, true);
+    const intersections = raycaster.intersectObjects(objects);
 
     const onObject = intersections.length > 0;
 
@@ -275,9 +284,11 @@ function animate() {
     if (onObject === true) {
       velocity.y = Math.max(0, velocity.y);
       canJump = true;
-      //do something    
-    }else if (rcState === true && onObject === false) {
-      indicatorElem.style.visibility = "hidden";
+      //do something
+    } else {
+      //do something
+      //indicatorElem.style.visibility = "hidden";
+      //rcState = false;
     }
 
     controls.moveRight(-velocity.x * delta);
@@ -288,7 +299,6 @@ function animate() {
     if (controls.getObject().position.y < 10) {
       velocity.y = 0;
       controls.getObject().position.y = 10;
-
       canJump = true;
     }
   }
@@ -303,7 +313,7 @@ function onClick(event) {
   doRaycasterCross(event.which);
 }
 
-function onMouseDown(event){
+function onMouseDown(event) {
   //console.log(event.which);
   doRaycasterCross(event.which);
 }
@@ -315,6 +325,10 @@ function onMouseMove(event) {
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 }
 
+// function onDbClick(event) {
+//   console.log(event);
+// }
+
 function doRaycasterCross(which) {
   // console.log('doCaster');
   // update the picking ray with the camera and mouse position
@@ -324,7 +338,7 @@ function doRaycasterCross(which) {
     new THREE.Vector3(),
     new THREE.Vector3(0, -1, 0),
     0,
-    200
+    100
   );
   raycasterCross.setFromCamera(crossVector, camera);
   // calculate objects intersecting the picking ray
@@ -333,14 +347,14 @@ function doRaycasterCross(which) {
   indicatorElem.style.visibility = "hidden";
   const intersectCondition = intersects.length > 0;
   if (controls.isLocked === true) {
-    if (which === 1){
+    if (which === 1) {
       if (intersectCondition) {
         openLink(intersects[0].object);
+        //console.log(intersects[0].object);
       }
-    }
-    else if (which === 3){
+    } else if (which === 3) {
       if (intersectCondition) {
-        console.log("right click")
+        //console.log("right click");
         showDetail(intersects[0].object);
       }
     }
@@ -375,11 +389,11 @@ function addCrosshair(camera) {
 
 async function showDetail(obj) {
   //console.log(obj, onObject);
-  if(controls.isLocked === true){
+  if (controls.isLocked === true) {
     if (rcState) {
       indicatorElem.style.visibility = "hidden";
       rcState = false;
-    }else{
+    } else {
       indicatorElem.style.visibility = "visible";
       //indicatorElem.innerHTML = obj.page;
       let url = obj.page.URL;
@@ -393,35 +407,158 @@ function openLink(obj) {
   let url = obj.userData.URL;
   if (typeof url !== "undefined") {
     window.open(url, "_blank");
+  } else {
+    //console.log(obj.Tag);
+    if (obj.Tag === "video") {
+      if (obj.name == "david_08") {
+        david.play();
+      } else if (obj.name == "asako_11") {
+        asako.play();
+      } else if (obj.name == "eunhee_04") {
+        eunhee.play();
+      } else if (obj.name == "invasion_19") {
+        invasion.play();
+      } else if (obj.name == "terms") {
+        terms.play();
+      }
+    }
   }
 }
 
 function createGeometry() {
-  const geometry = new THREE.BoxGeometry(16, 9, 1);
-  const material = new THREE.MeshBasicMaterial({ color: 0xd6dee2 });
-  const box_11 = new THREE.Mesh(geometry, material);
-  box_11.name = "all_11_video";
-  box_11.position.set(-250, 30, -400);
-  box_11.scale.set(6, 6, 2);
-  scene.add(box_11);
+  //莊培鑫
+  //Create your video texture:
+  const david_videoTexture = new THREE.VideoTexture(david);
+  const david_videoMaterial = new THREE.MeshBasicMaterial({
+    map: david_videoTexture,
+    side: THREE.DoubleSide,
+    toneMapped: false,
+  });
+  //Create screen
+  const screenDavid = new THREE.PlaneGeometry(1, 1);
+  const videoDavid = new THREE.Mesh(screenDavid, david_videoMaterial);
+  videoDavid.name = "david_08";
+  videoDavid.Tag = "video";
+  videoDavid.page = { URL: "pages/David.html" };
+  videoDavid.position.set(-350, 50, -100);
+  videoDavid.rotation.set(0, 80, 0);
+  videoDavid.scale.set(60, 100, 10);
+  objects.push(videoDavid);
+  scene.add(videoDavid);
+  //藤倉
+  //Create your video texture:
+  const asako_videoTexture = new THREE.VideoTexture(asako);
 
-  const geometry2 = new THREE.BoxGeometry(16, 9, 1);
-  const material2 = new THREE.MeshBasicMaterial({ color: 0xd6dee2 });
-  const box_19 = new THREE.Mesh(geometry2, material2);
-  box_19.name = "all_11_video";
-  box_19.position.set(-450, 30, -200);
-  box_19.rotation.set(0, 40, 0);
-  box_19.scale.set(6, 6, 2);
-  scene.add(box_19);
+  const asako_videoMaterial = new THREE.MeshBasicMaterial({
+    map: asako_videoTexture,
+    side: THREE.DoubleSide,
+    toneMapped: false,
+  });
+  //Create screen
+  const screenAsako = new THREE.PlaneGeometry(1, 1);
+  const videoAsako = new THREE.Mesh(screenAsako, asako_videoMaterial);
+  videoAsako.name = "asako_11";
+  videoAsako.Tag = "video";
+  videoAsako.page = { URL: "pages/Asako.html" };
+  videoAsako.position.set(-250, 30, -400);
+  videoAsako.scale.set(100, 56.25, 10);
+  objects.push(videoAsako);
+  scene.add(videoAsako);
+  //李恩喜
+  //Create your video texture:
+  const eunhee_videoTexture = new THREE.VideoTexture(eunhee);
 
-  const geometry3 = new THREE.BoxGeometry(16, 9, 1);
-  const material3 = new THREE.MeshBasicMaterial({ color: 0xd6dee2 });
-  const box_08 = new THREE.Mesh(geometry3, material3);
-  box_08.name = "all_11_video";
-  box_08.position.set(-350, 30, -100);
-  box_08.rotation.set(0, 80, 0);
-  box_08.scale.set(6, 6, 2);
-  scene.add(box_08);
+  const eunhee_videoMaterial = new THREE.MeshBasicMaterial({
+    map: eunhee_videoTexture,
+    side: THREE.DoubleSide,
+    toneMapped: false,
+  });
+  //Create screen
+  const screenEunhee = new THREE.PlaneGeometry(1, 1);
+  const videoEunhee = new THREE.Mesh(screenEunhee, eunhee_videoMaterial);
+  videoEunhee.name = "eunhee_04";
+  videoEunhee.Tag = "video";
+  videoEunhee.page = { URL: "pages/Eunhee.html" };
+  videoEunhee.position.set(-450, 30, -250);
+  videoEunhee.rotation.set(0, 40, 0);
+  videoEunhee.scale.set(200, 56.25, 10);
+  objects.push(videoEunhee);
+  scene.add(videoEunhee);
+  //阮柏遠
+  //Create your video texture:
+  const invasion_videoTexture = new THREE.VideoTexture(invasion);
+
+  const invasion_videoMaterial = new THREE.MeshBasicMaterial({
+    map: invasion_videoTexture,
+    side: THREE.DoubleSide,
+    toneMapped: false,
+  });
+  //Create screen
+  const screenInvasion = new THREE.PlaneGeometry(1, 1);
+  const videoInvasion = new THREE.Mesh(screenInvasion, invasion_videoMaterial);
+  videoInvasion.name = "invasion_19";
+  videoInvasion.Tag = "video";
+  videoInvasion.page = { URL: "pages/Invasion.html" };
+  videoInvasion.position.set(-100, 30, 300);
+  videoInvasion.rotation.set(0, 40, 0);
+  videoInvasion.scale.set(100, 56.25, 10);
+  objects.push(videoInvasion);
+  scene.add(videoInvasion);
+
+  //吳柏瑤
+  //Create your video texture:
+  const terms_videoTexture = new THREE.VideoTexture(terms);
+
+  const terms_videoMaterial = new THREE.MeshBasicMaterial({
+    map: terms_videoTexture,
+    side: THREE.DoubleSide,
+    toneMapped: false,
+  });
+  //Create screen
+  const screenTerms = new THREE.PlaneGeometry(16, 9, 20, 20);
+  planeCurve(screenTerms, 15);
+  const videoTerms = new THREE.Mesh(screenTerms, terms_videoMaterial);
+  videoTerms.name = "terms";
+  videoTerms.Tag = "video";
+  videoTerms.page = { URL: "pages/Terms.html" };
+  videoTerms.position.set(-300, 60, 100);
+  videoTerms.rotation.set(0, 40, 0);
+  videoTerms.scale.set(10, 10, 10);
+  objects.push(videoTerms);
+  scene.add(videoTerms);
+}
+
+function planeCurve(g, z) {
+  let p = g.parameters;
+  let hw = p.width * 0.5;
+
+  let a = new THREE.Vector2(-hw, 0);
+  let b = new THREE.Vector2(0, z);
+  let c = new THREE.Vector2(hw, 0);
+
+  let ab = new THREE.Vector2().subVectors(a, b);
+  let bc = new THREE.Vector2().subVectors(b, c);
+  let ac = new THREE.Vector2().subVectors(a, c);
+
+  let r =
+    (ab.length() * bc.length() * ac.length()) / (2 * Math.abs(ab.cross(ac)));
+
+  let center = new THREE.Vector2(0, z - r);
+  let baseV = new THREE.Vector2().subVectors(a, center);
+  let baseAngle = baseV.angle() - Math.PI * 0.5;
+  let arc = baseAngle * 2;
+
+  let uv = g.attributes.uv;
+  let pos = g.attributes.position;
+  let mainV = new THREE.Vector2();
+  for (let i = 0; i < uv.count; i++) {
+    let uvRatio = 1 - uv.getX(i);
+    let y = pos.getY(i);
+    mainV.copy(c).rotateAround(center, arc * uvRatio);
+    pos.setXYZ(i, mainV.x, y, -mainV.y);
+  }
+
+  pos.needsUpdate = true;
 }
 
 function loadingManager() {
@@ -468,7 +605,7 @@ function loadingManager() {
         child.material.metalness = 0;
         child.name = "Necklace_AnchiLin";
         child.userData = { URL: "https://raxal-mu.glitch.me/" };
-        child.page = { URL: "pages/AnchiLin.html" };        
+        child.page = { URL: "pages/AnchiLin.html" };
         objects.push(child);
       }
       if (child.isLight) {
@@ -674,15 +811,42 @@ function loadingManager() {
     scene.add(model);
   });
   //吳柏瑤
-  loader.load("wuscene_21.glb", (gltf) => {
+  // loader.load("wuscene_21.glb", (gltf) => {
+  //   let model = gltf.scene;
+  //   model.traverse(function (child) {
+  //     if (child.isMesh) {
+  //       child.castShadow = true;
+  //       child.receiveShadow = true;
+  //       //child.geometry.center(); // center here
+  //       child.name = "wuscene_21";
+  //       child.userData = { URL: "https://www.youtube.com/watch?v=EvG7rtuEsjk" };
+  //       child.page = { URL: "pages/Terms.html" };
+  //       objects.push(child);
+  //     }
+  //     if (child.isLight) {
+  //       child.castShadow = true;
+  //       child.shadow.bias = -0.003;
+  //       child.shadow.mapSize.width = 2048;
+  //       child.shadow.mapSize.height = 2048;
+  //     }
+  //   });
+  //   model.scale.set(1, 1, 1); // scale here
+  //   model.position.set(-300, 20, 100); // position here
+  //   model.rotation.set(0, 340, 0); // position here
+  //   scene.add(model);
+  // });
+  //NAXS
+  loader.load("naxs.glb", (gltf) => {
     let model = gltf.scene;
     model.traverse(function (child) {
       if (child.isMesh) {
         child.castShadow = true;
         child.receiveShadow = true;
         //child.geometry.center(); // center here
-        child.name = "wuscene_21";
-        child.userData = { URL: "" };
+        child.name = "naxs";
+        //child.userData = { URL: "" };
+        child.userData = { URL: "http://id0.world" };
+        child.page = { URL: "pages/Naxs.html" };
         objects.push(child);
       }
       if (child.isLight) {
@@ -692,8 +856,8 @@ function loadingManager() {
         child.shadow.mapSize.height = 2048;
       }
     });
-    model.scale.set(1, 1, 1); // scale here
-    model.position.set(-300, 20, 100); // position here
+    model.scale.set(0.8, 0.8, 0.8); // scale here
+    model.position.set(1, 0, 200); // position here
     model.rotation.set(0, 340, 0); // position here
     scene.add(model);
   });
