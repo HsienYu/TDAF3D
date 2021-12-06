@@ -72,7 +72,7 @@ function init() {
     75,
     window.innerWidth / window.innerHeight,
     1,
-    1000
+    2000
   );
   camera.position.y = 10;
 
@@ -83,7 +83,7 @@ function init() {
   //const loader = new THREE.TextureLoader();
   //scene.background = loader.load( './textures/background.jpg' );
   //scene.background.encoding = THREE.sRGBEncoding;
-  scene.fog = new THREE.Fog(0x585858, 0, 750);
+  scene.fog = new THREE.Fog(0x585858, 70, 1500);
 
   // const light = new THREE.HemisphereLight(0xeeeeff, 0x777788, 0.75);
   // light.position.set(0.5, 10, 0.75);
@@ -232,10 +232,14 @@ function init() {
     "color",
     new THREE.Float32BufferAttribute(colorsFloor, 3)
   );
-
-  const floorMaterial = new THREE.MeshBasicMaterial({
-    vertexColors: true,
+  const floorMaterial = new THREE.MeshPhysicalMaterial({
+    roughness: 0,
+    transmission: 1,
+    thickness: 0.5, // Add refraction!
   });
+  // const floorMaterial = new THREE.MeshBasicMaterial({
+  //   vertexColors: true,
+  // });
 
   const floor = new THREE.Mesh(floorGeometry, floorMaterial);
   scene.add(floor);
@@ -247,7 +251,7 @@ function init() {
   //positional audio
   camera.add(listener);
 
-  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
 
@@ -490,12 +494,23 @@ function openLink(obj) {
   if (obj.name === "scence19") {
     showDetail_video(obj);
     //console.log("hihihihi");
-  }else if(obj.name === "eunhee_cube"){
+  } else if (obj.name === "eunhee_cube") {
     showDetail_video(obj);
   }
 }
 
 function createGeometry() {
+  //sphere bg
+  var skyGeo = new THREE.SphereGeometry(1300, 25, 25);
+  var skyGeoloader = new THREE.TextureLoader(),
+    skyGeotexture = skyGeoloader.load("./textures/bg.jpg");
+  var skyGeotexturematerial = new THREE.MeshPhongMaterial({
+    map: skyGeotexture,
+  });
+  var sky = new THREE.Mesh(skyGeo, skyGeotexturematerial);
+  sky.material.side = THREE.DoubleSide;
+  scene.add(sky);
+
   //莊培鑫
   //Create your video texture:
   audioDavid.load("./videos/david.m4a", function (buffer) {
@@ -1019,6 +1034,8 @@ function loadingManager() {
         child.material.envMap = scene.environment;
         child.material.side = THREE.DoubleSide;
         child.material.reflectivity = 0.5;
+        child.transmission = 1;
+        child.thickness = 0.5; // Add refraction!
 
         //child.userData = { URL: "" };
         child.userData = { URL: "http://id0.world" };
@@ -1052,6 +1069,8 @@ function loadingManager() {
         child.material.envMap = scene.environment;
         child.material.side = THREE.DoubleSide;
         child.material.reflectivity = 0.5;
+        child.transmission = 1;
+        child.thickness = 0.5; // Add refraction!
         //child.userData = { URL: "" };
       }
       if (child.isLight) {
