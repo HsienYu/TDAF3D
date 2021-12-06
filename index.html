@@ -16,6 +16,7 @@
     <script src="./js/controls/PointerLockControls.js"></script>
     <script src="./js/loaders/GLTFLoader.js"></script>
     <script src="./js/loaders/DRACOLoader.js"></script>
+
     <script src="./src/timmer.js"></script>
   </head>
   <body>
@@ -35,7 +36,7 @@
       <p id = "percent"></p>
       <div class="progress"><div class="progressbar"></div></div>
       <div class="recommandation">
-        <video id="intro" width="720" height="480" poster="promo_video.png" controls>
+        <video id="intro" controls autoplay width="720" height="480" poster="videos/promo_video.png" controls>
           <source src="videos/shortPromo.mp4" type="video/mp4" />
           </object>
         </video>
@@ -81,7 +82,7 @@
       muted
       width="1392"
       height="480"
-      src="videos/eunhee.mp4"
+      src="videos/eunhee.webm"
       style="display: none"
       poster="videos/eunhee.png"
     ></video>
@@ -92,7 +93,7 @@
       muted
       width="853"
       height="480"
-      src="videos/invasion.mp4"
+      src="videos/invasion.webm"
       style="display: none"
       poster="videos/invasion.png"
     ></video>
@@ -112,6 +113,8 @@
       playsinline
       webkit-playsinline
       muted
+      loop
+      autoplay
       width="720"
       height="480"
       src="videos/shortPromo.mp4"
@@ -123,6 +126,8 @@
       playsinline
       webkit-playsinline
       muted
+      loop
+      autoplay
       width="720"
       height="480"
       src="videos/promo_video.mp4"

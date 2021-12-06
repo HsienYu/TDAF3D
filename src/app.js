@@ -65,6 +65,8 @@ const terms = document.getElementById("terms");
 const shortpromo = document.getElementById("shortPromo");
 const promo = document.getElementById("promoVideo");
 
+const invasion_video = document.getElementById("invasion_video");
+
 function init() {
   camera = new THREE.PerspectiveCamera(
     75,
@@ -76,61 +78,27 @@ function init() {
 
   addCrosshair(camera);
 
-  //
-  //   const fragmentShader = `#include <common>
-
-  // uniform vec3 iResolution;
-  // uniform float iTime;
-
-  // // By iq: https://www.shadertoy.com/user/iq
-  // // license: Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License.
-  // void mainImage( out vec4 fragColor, in vec2 fragCoord )
-  // {
-  //     // Normalized pixel coordinates (from 0 to 1)
-  //     vec2 uv = fragCoord/iResolution.xy;
-
-  //     // Time varying pixel color
-  //     vec3 col = 0.5 + 0.5*cos(iTime+uv.xyx+vec3(0,2,4));
-
-  //     // Output to screen
-  //     fragColor = vec4(col,1.0);
-  // }
-
-  // void main() {
-  //   mainImage(gl_FragColor, gl_FragCoord.xy);
-  // }
-  // `;
-
-  //   const uniforms = {
-  //     iTime: { value: 0 },
-  //     iResolution: { value: new THREE.Vector3() },
-  //   };
-  //   const spec_material = new THREE.ShaderMaterial({
-  //     fragmentShader,
-  //     uniforms,
-  //   });
-  ///
   scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x050505);
+  scene.background = new THREE.Color(0x252525);
   //const loader = new THREE.TextureLoader();
   //scene.background = loader.load( './textures/background.jpg' );
   //scene.background.encoding = THREE.sRGBEncoding;
   scene.fog = new THREE.Fog(0x585858, 0, 750);
 
-  const light = new THREE.HemisphereLight(0xeeeeff, 0x777788, 0.75);
-  light.position.set(0.5, 10, 0.75);
-  scene.add(light);
+  // const light = new THREE.HemisphereLight(0xeeeeff, 0x777788, 0.75);
+  // light.position.set(0.5, 10, 0.75);
+  // scene.add(light);
 
   const ambientlight = new THREE.AmbientLight(0x6688cc);
   scene.add(ambientlight);
 
-  const fillLight1 = new THREE.DirectionalLight(0xff9999, 0.5);
-  fillLight1.position.set(-1, 10, 2);
-  scene.add(fillLight1);
+  // const fillLight1 = new THREE.DirectionalLight(0xff9999, 0.5);
+  // fillLight1.position.set(-1, 10, 2);
+  // scene.add(fillLight1);
 
-  const fillLight2 = new THREE.DirectionalLight(0x8888ff, 0.2);
-  fillLight2.position.set(0, -1, 0);
-  scene.add(fillLight2);
+  // const fillLight2 = new THREE.DirectionalLight(0x8888ff, 0.2);
+  // fillLight2.position.set(0, -1, 0);
+  // scene.add(fillLight2);
 
   const directionalLight = new THREE.DirectionalLight(0xffffaa, 1.2);
   directionalLight.position.set(-5, 25, -1);
@@ -459,11 +427,29 @@ async function showDetail(obj) {
   if (controls.isLocked === true) {
     if (rcState) {
       indicatorElem.style.visibility = "hidden";
+      indicatorElem.innerHTML = "";
       rcState = false;
     } else {
       indicatorElem.style.visibility = "visible";
       //indicatorElem.innerHTML = obj.page;
       let url = obj.page.URL;
+      indicatorElem.innerHTML = await (await fetch(url)).text();
+      rcState = true;
+    }
+  }
+}
+
+async function showDetail_video(obj) {
+  //console.log(obj, onObject);
+  if (controls.isLocked === true) {
+    if (rcState) {
+      indicatorElem.style.visibility = "hidden";
+      indicatorElem.innerHTML = "";
+      rcState = false;
+    } else {
+      indicatorElem.style.visibility = "visible";
+      //indicatorElem.innerHTML = obj.page;
+      let url = obj.page_video.URL;
       indicatorElem.innerHTML = await (await fetch(url)).text();
       rcState = true;
     }
@@ -501,6 +487,12 @@ function openLink(obj) {
       }
     }
   }
+  if (obj.name === "scence19") {
+    showDetail_video(obj);
+    //console.log("hihihihi");
+  }else if(obj.name === "eunhee_cube"){
+    showDetail_video(obj);
+  }
 }
 
 function createGeometry() {
@@ -517,7 +509,8 @@ function createGeometry() {
     toneMapped: false,
   });
   //Create screen
-  const screenDavid = new THREE.PlaneGeometry(1, 1);
+  const screenDavid = new THREE.PlaneBufferGeometry(1, 1, 1, 1);
+
   const videoDavid = new THREE.Mesh(screenDavid, david_videoMaterial);
   videoDavid.name = "david_08";
   videoDavid.Tag = "video";
@@ -541,7 +534,7 @@ function createGeometry() {
     toneMapped: false,
   });
   //Create screen
-  const screenAsako = new THREE.PlaneGeometry(1, 1);
+  const screenAsako = new THREE.PlaneBufferGeometry(1, 1, 1, 1);
   const videoAsako = new THREE.Mesh(screenAsako, asako_videoMaterial);
   videoAsako.name = "asako_11";
   videoAsako.Tag = "video";
@@ -564,7 +557,7 @@ function createGeometry() {
     toneMapped: false,
   });
   //Create screen
-  const screenEunhee = new THREE.PlaneGeometry(1, 1);
+  const screenEunhee = new THREE.PlaneBufferGeometry(1, 1, 1, 1);
   const videoEunhee = new THREE.Mesh(screenEunhee, eunhee_videoMaterial);
   videoEunhee.name = "eunhee_04";
   videoEunhee.Tag = "video";
@@ -575,6 +568,20 @@ function createGeometry() {
   videoEunhee.add(eunheePA);
   objects.push(videoEunhee);
   scene.add(videoEunhee);
+  //add cube
+  const geometry = new THREE.BoxGeometry(1, 1, 1);
+  const material = new THREE.MeshBasicMaterial({ color: 0x000000 });
+  const cubelee = new THREE.Mesh(geometry, material);
+  cubelee.name = "eunhee_cube";
+  cubelee.Tag = "video";
+  cubelee.page = { URL: "pages/Eunhee.html" };
+  cubelee.page_video = { URL: "pages/eunhee_video.html" };
+  cubelee.position.set(-500, 30, -300);
+  cubelee.rotation.set(50, 120, 90);
+  cubelee.scale.set(40, 40, 40);
+  objects.push(cubelee);
+  scene.add(cubelee);
+
   //阮柏遠
   //Create your video texture:
   const invasion_videoTexture = new THREE.VideoTexture(invasion);
@@ -589,12 +596,12 @@ function createGeometry() {
     toneMapped: false,
   });
   //Create screen
-  const screenInvasion = new THREE.PlaneGeometry(1, 1);
+  const screenInvasion = new THREE.PlaneBufferGeometry(1, 1, 1, 1);
   const videoInvasion = new THREE.Mesh(screenInvasion, invasion_videoMaterial);
   videoInvasion.name = "invasion_19";
   videoInvasion.Tag = "video";
   videoInvasion.page = { URL: "pages/Invasion.html" };
-  videoInvasion.position.set(-300, 40, -850);
+  videoInvasion.position.set(-170, 60, -950);
   videoInvasion.rotation.set(0, 180, 0);
   videoInvasion.scale.set(150, 84, 10);
   videoInvasion.add(invasionPA);
@@ -615,7 +622,7 @@ function createGeometry() {
     toneMapped: false,
   });
   //Create screen
-  const screenTerms = new THREE.PlaneGeometry(16, 9, 20, 20);
+  const screenTerms = new THREE.PlaneBufferGeometry(16, 9, 20, 20);
   planeCurve(screenTerms, 15);
   const videoTerms = new THREE.Mesh(screenTerms, terms_videoMaterial);
   videoTerms.name = "terms";
@@ -635,7 +642,7 @@ function createGeometry() {
     festivalSound.setVolume(1);
     festivalSound.setLoop(true);
   });
-  const entraceWall = new THREE.BoxGeometry(25, 10, 1);
+  const entraceWall = new THREE.BoxBufferGeometry(25, 10, 1);
   const entraceWalltexture = new THREE.TextureLoader().load(
     "./textures/statement.png"
   );
@@ -656,7 +663,7 @@ function createGeometry() {
   scene.add(entraceWallMesh);
 
   //活動告示牆面
-  const eventWall = new THREE.BoxGeometry(25, 10, 1);
+  const eventWall = new THREE.BoxBufferGeometry(25, 10, 1);
   const eventWalltexture = new THREE.TextureLoader().load(
     "./textures/eventinfo.png"
   );
@@ -689,7 +696,7 @@ function createGeometry() {
     toneMapped: false,
   });
   //Create screen
-  const screenShortPromo = new THREE.PlaneGeometry(7.2, 4.8);
+  const screenShortPromo = new THREE.PlaneBufferGeometry(7.2, 4.8);
   const videoShortPromo = new THREE.Mesh(
     screenShortPromo,
     shortPromo_videoMaterial
@@ -716,12 +723,12 @@ function createGeometry() {
     toneMapped: false,
   });
   //Create screen
-  const screenPromo = new THREE.PlaneGeometry(7.2, 4.8);
+  const screenPromo = new THREE.PlaneBufferGeometry(7.2, 4.8);
   const videoPromo = new THREE.Mesh(screenPromo, promo_videoMaterial);
   videoPromo.name = "promo";
   videoPromo.Tag = "video";
-  videoPromo.position.set(400, 60, -400);
-  videoPromo.rotation.set(0, 320, 0);
+  videoPromo.position.set(300, 60, -300);
+  videoPromo.rotation.set(0, 200, 0);
   videoPromo.scale.set(20, 20, 10);
   videoPromo.add(promoPA);
   objects.push(videoPromo);
@@ -788,7 +795,8 @@ function loadingManager() {
     console.log("Loaded:", Math.round((loaded / total) * 100, 2) + "%");
     const progress = loaded / total;
     progressBarElem.style.transform = `scaleX(${progress})`;
-    document.getElementById("percent").innerHTML = Math.round((loaded / total) * 100, 2) + "%";
+    document.getElementById("percent").innerHTML =
+      Math.round((loaded / total) * 100, 2) + "%";
   };
 
   manager.onError = function (url) {
@@ -884,7 +892,7 @@ function loadingManager() {
     scene.add(model);
   });
   //花形槙
-  loader.load("aseptickiss.glb", (gltf) => {
+  loader.load("aseptickkiss_new.glb", (gltf) => {
     let model = gltf.scene;
     model.traverse(function (child) {
       if (child.isMesh) {
@@ -892,7 +900,7 @@ function loadingManager() {
         child.receiveShadow = true;
         //child.geometry.center(); // center here
         child.material.metalness = 0;
-        child.name = "aseptickiss";
+        child.name = "aseptickiss_new";
         child.userData = {
           URL: "https://object-storage.tyo1.conoha.io/v1/nc_df3bdbc45bc04950b558834f5728517a/unityroom_production/game/23352/webgl/play.html",
         };
@@ -906,8 +914,8 @@ function loadingManager() {
         child.shadow.mapSize.height = 2048;
       }
     });
-    model.scale.set(0.5, 0.5, 0.5); // scale here
-    model.position.set(-100, -180, -200); // position here
+    model.scale.set(50, 50, 50); // scale here
+    model.position.set(200, 60, -500); // position here
     model.rotation.set(0, 0, 0); // position here
     scene.add(model);
   });
@@ -977,7 +985,9 @@ function loadingManager() {
         //child.geometry.center(); // center here
         child.material.metalness = 0.5;
         child.material.roughness = 0.0;
-        child.material.envMap = scene.background;
+        child.material.envMap = scene.environment;
+        child.material.reflectivity = 0.5;
+
         child.name = "blackdoorInside";
         child.userData = { URL: "http://www.realm-of-ember.space/" };
         child.page = { URL: "pages/Realm.html" };
@@ -1006,8 +1016,10 @@ function loadingManager() {
         child.name = "naxs";
         child.material.metalness = 0.3;
         child.material.roughness = 0.0;
-        child.material.envMap = scene.background;
+        child.material.envMap = scene.environment;
         child.material.side = THREE.DoubleSide;
+        child.material.reflectivity = 0.5;
+
         //child.userData = { URL: "" };
         child.userData = { URL: "http://id0.world" };
         child.page = { URL: "pages/Naxs.html" };
@@ -1035,13 +1047,12 @@ function loadingManager() {
         child.receiveShadow = true;
         //child.geometry.center(); // center here
         child.name = "terms";
-        child.material.metalness = 0.1;
-        child.material.roughness = 0.0;
-        child.material.envMap = scene.background;
+        child.material.metalness = 0.6;
+        child.material.roughness = 0;
+        child.material.envMap = scene.environment;
         child.material.side = THREE.DoubleSide;
+        child.material.reflectivity = 0.5;
         //child.userData = { URL: "" };
-        child.page = { URL: "pages/terms.html" };
-        objects.push(child);
       }
       if (child.isLight) {
         child.castShadow = true;
@@ -1052,6 +1063,61 @@ function loadingManager() {
     });
     model.scale.set(0.1, 0.1, 0.1); // scale here
     model.position.set(-550, 5, 50); // position here
+    model.rotation.set(0, 0, 0); // position here
+    scene.add(model);
+  });
+
+  //劉張妙齊
+  loader.load("newhuman.glb", (gltf) => {
+    let model = gltf.scene;
+    model.traverse(function (child) {
+      if (child.isMesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+        //child.geometry.center(); // center here
+        child.material.metalness = 0;
+        child.name = "newhuman";
+        child.userData = {
+          URL: "http://www.newhumansworld.com/",
+        };
+        child.page = { URL: "pages/newhuman.html" };
+        objects.push(child);
+      }
+      if (child.isLight) {
+        child.castShadow = true;
+        child.shadow.bias = -0.003;
+        child.shadow.mapSize.width = 2048;
+        child.shadow.mapSize.height = 2048;
+      }
+    });
+    model.scale.set(40, 40, 40); // scale here
+    model.position.set(100, 30, -700); // position here
+    model.rotation.set(0, 0, 0); // position here
+    scene.add(model);
+  });
+  //阮伯源
+  loader.load("scence19.glb", (gltf) => {
+    let model = gltf.scene;
+    model.traverse(function (child) {
+      if (child.isMesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+        child.material.metalness = 0;
+        child.name = "scence19";
+        child.Tag = "video";
+        child.page = { URL: "pages/Invasion.html" };
+        child.page_video = { URL: "pages/invasion_video.html" };
+        objects.push(child);
+      }
+      if (child.isLight) {
+        child.castShadow = true;
+        child.shadow.bias = -0.003;
+        child.shadow.mapSize.width = 2048;
+        child.shadow.mapSize.height = 2048;
+      }
+    });
+    model.scale.set(0.01, 0.01, 0.01); // scale here
+    model.position.set(-200, 0, -950); // position here
     model.rotation.set(0, 0, 0); // position here
     scene.add(model);
   });
