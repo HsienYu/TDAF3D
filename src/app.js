@@ -50,6 +50,9 @@ const audioShortPromo = new THREE.AudioLoader();
 const promoPA = new THREE.PositionalAudio(listener);
 const audioPromo = new THREE.AudioLoader();
 
+const billPA = new THREE.PositionalAudio(listener);
+const audioBill = new THREE.AudioLoader();
+
 const loadingElem = document.querySelector("#loading");
 const progressBarElem = loadingElem.querySelector(".progressbar");
 const instructionsElem = document.querySelector("#instructions");
@@ -66,6 +69,7 @@ const shortpromo = document.getElementById("shortPromo");
 const promo = document.getElementById("promoVideo");
 
 const invasion_video = document.getElementById("invasion_video");
+const bill = document.getElementById("bill");
 
 function init() {
   camera = new THREE.PerspectiveCamera(
@@ -491,6 +495,9 @@ function openLink(obj) {
       } else if (obj.name == "promo") {
         promo.play();
         promoPA.play();
+      }else if (obj.name == "billVideo") {
+        bill.play();
+        billPA.play();
       }
     }
   }
@@ -765,6 +772,32 @@ function createGeometry() {
   videoPromo.add(promoPA);
   objects.push(videoPromo);
   scene.add(videoPromo);
+
+  //金天尹
+  //Create your video texture:
+  audioBill.load("./videos/18chin.ogg", function (buffer) {
+    billPA.setBuffer(buffer);
+    billPA.setRefDistance(15);
+  });
+  const bill_videoTexture = new THREE.VideoTexture(bill);
+  const bill_videoMaterial = new THREE.MeshBasicMaterial({
+    map: bill_videoTexture,
+    side: THREE.DoubleSide,
+    toneMapped: false,
+  });
+  //Create screen
+  const screenBill = new THREE.PlaneBufferGeometry(1, 1, 1, 1);
+  const videoBill = new THREE.Mesh(screenBill, bill_videoMaterial);
+  videoBill.name = "billVideo";
+  videoBill.Tag = "video";
+  videoBill.page = { URL: "pages/bill.html" };
+  videoBill.position.set(-413, 87.6, 544);
+  videoBill.scale.set(135, 66, 1);
+  videoBill.rotation.set(0, 90, 0);
+  videoBill.add(billPA);
+  objects.push(videoBill);
+  scene.add(videoBill);
+
 }
 
 function planeCurve(g, z) {
@@ -947,7 +980,7 @@ function loadingManager() {
       }
     });
     model.scale.set(50, 50, 50); // scale here
-    model.position.set(200, 60, -800); // position here
+    model.position.set(200, 60, -600); // position here
     model.rotation.set(0, 0, 0); // position here
     scene.add(model);
   });
@@ -1166,9 +1199,10 @@ function loadingManager() {
         child.receiveShadow = true;
         child.material.metalness = 0;
         child.name = "bill";
-        //child.Tag = "video";
-        //child.page = { URL: "pages/Invasion.html" };
-        //child.page_video = { URL: "pages/invasion_video.html" };
+        child.userData = {
+          URL: "https://tienyingchin.itch.io/cctv",
+        };
+        child.page = { URL: "pages/bill.html" };
         objects.push(child);
       }
       if (child.isLight) {
@@ -1178,9 +1212,9 @@ function loadingManager() {
         child.shadow.mapSize.height = 2048;
       }
     });
-    model.scale.set(100, 100, 100); // scale here
-    model.position.set(0, 0, 0); // position here
-    model.rotation.set(0, 0, 0); // position here
+    model.scale.set(7, 7, 7); // scale here
+    model.position.set(-400, 54, 600); // position here
+    model.rotation.set(0, 90, 0); // position here
     scene.add(model);
   });
 }
