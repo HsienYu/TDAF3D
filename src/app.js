@@ -76,6 +76,9 @@ function init() {
   );
   camera.position.y = 10;
 
+  camera.position.x = 0;
+  camera.position.z = 700;
+
   addCrosshair(camera);
 
   scene = new THREE.Scene();
@@ -83,7 +86,7 @@ function init() {
   //const loader = new THREE.TextureLoader();
   //scene.background = loader.load( './textures/background.jpg' );
   //scene.background.encoding = THREE.sRGBEncoding;
-  scene.fog = new THREE.Fog(0x585858, 70, 1500);
+  scene.fog = new THREE.Fog(0x905858, 70, 1500);
 
   // const light = new THREE.HemisphereLight(0xeeeeff, 0x777788, 0.75);
   // light.position.set(0.5, 10, 0.75);
@@ -511,6 +514,20 @@ function createGeometry() {
   sky.material.side = THREE.DoubleSide;
   scene.add(sky);
 
+  //cylinder
+  var cylinderGeo = new THREE.CylinderGeometry(10, 10, 100, 32);
+  const cylinderMaterial = new THREE.MeshPhysicalMaterial({
+    roughness: 0,
+    transmission: 1,
+    thickness: 0.5, // Add refraction!
+  });
+  const cylinder = new THREE.Mesh(cylinderGeo, cylinderMaterial);
+  cylinder.position.set(0, 0, 0);
+  cylinder.rotation.set(0, 0, 0);
+  cylinder.scale.set(5, 30, 5);
+  scene.add(cylinder);
+
+
   //莊培鑫
   //Create your video texture:
   audioDavid.load("./videos/david.m4a", function (buffer) {
@@ -847,7 +864,7 @@ function loadingManager() {
       }
     });
     model.scale.set(1, 1, 1); // scale here
-    model.position.set(80, 10, -100); // position here
+    model.position.set(80, 10, -300); // position here
     scene.add(model);
   });
 
@@ -874,7 +891,7 @@ function loadingManager() {
       }
     });
     model.scale.set(30, 30, 30); // scale here
-    model.position.set(-100, 0, -140); // position here
+    model.position.set(-100, 0, -200); // position here
     scene.add(model);
   });
 
@@ -902,7 +919,7 @@ function loadingManager() {
       }
     });
     model.scale.set(0.5, 0.5, 0.5); // scale here
-    model.position.set(0, 0, -250); // position here
+    model.position.set(0, 0, -450); // position here
     model.rotation.set(0, 0, 0); // position here
     scene.add(model);
   });
@@ -930,7 +947,7 @@ function loadingManager() {
       }
     });
     model.scale.set(50, 50, 50); // scale here
-    model.position.set(200, 60, -500); // position here
+    model.position.set(200, 60, -800); // position here
     model.rotation.set(0, 0, 0); // position here
     scene.add(model);
   });
@@ -1137,6 +1154,32 @@ function loadingManager() {
     });
     model.scale.set(0.01, 0.01, 0.01); // scale here
     model.position.set(-200, 0, -950); // position here
+    model.rotation.set(0, 0, 0); // position here
+    scene.add(model);
+  });
+  //金天尹
+  loader.load("bill.glb", (gltf) => {
+    let model = gltf.scene;
+    model.traverse(function (child) {
+      if (child.isMesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+        child.material.metalness = 0;
+        child.name = "bill";
+        //child.Tag = "video";
+        //child.page = { URL: "pages/Invasion.html" };
+        //child.page_video = { URL: "pages/invasion_video.html" };
+        objects.push(child);
+      }
+      if (child.isLight) {
+        child.castShadow = true;
+        child.shadow.bias = -0.003;
+        child.shadow.mapSize.width = 2048;
+        child.shadow.mapSize.height = 2048;
+      }
+    });
+    model.scale.set(100, 100, 100); // scale here
+    model.position.set(0, 0, 0); // position here
     model.rotation.set(0, 0, 0); // position here
     scene.add(model);
   });
