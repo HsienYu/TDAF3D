@@ -43,3 +43,8 @@ p {
 .column {
   flex: 50%;
 }
+
+#logo{
+  height: 50px;
+  float: right;
+}
